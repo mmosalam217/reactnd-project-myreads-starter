@@ -1,29 +1,16 @@
 import React, { Component } from 'react'
 import Book from './Book'
-import * as BooksAPI from '../BooksAPI'
 
 class BookShelf extends Component {
 
-    changeBookShelf(id, category){   
-        if(category !== ''){
-            BooksAPI.update({id}, category)
-            .then(updates =>{
-              console.log(updates)
-              BooksAPI.get(id)
-              .then(book=>{
-                console.log(book)
-              })
-              .catch(err => console.error(err))
-            })
-            .catch(err => console.error(err))
-        }
-        
+  constructor(props){
+    super(props)
+    this.changeShelf = this.changeShelf.bind(this)
+  }
+    changeShelf(id, old_shelf, new_shelf){   
+      this.props.changeShelf(id, old_shelf, new_shelf)        
     }
 
-    componentDidMount(){
-        console.log(this.props)     
-
-    }
 
     render(){
         return (
@@ -36,7 +23,7 @@ class BookShelf extends Component {
                   .map(book =>                   
                     <li key={book.id}> 
                         <Book shelf={book.shelf}
-                        changeShelf = {this.changeBookShelf}
+                        changeShelf = {this.changeShelf}
                         id={book.id} 
                         cover={book.imageLinks.thumbnail} 
                         title={book.title} 

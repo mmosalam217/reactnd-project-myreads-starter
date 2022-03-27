@@ -4,34 +4,35 @@ import Book from './Book'
 import {Link} from 'react-router-dom'
 
 class Search extends Component {
-    static state = {
-        result: []
+  constructor(props){
+    super(props)
+    this.state = {
+      result: []
     }
+    this.addToShelf = this.addToShelf.bind(this)
+  }
+  
 
-    terms = [
-      'Android', 'Art', 'Artificial Intelligence', 'Astronomy', 'Austen', 'Baseball', 'Basketball', 'Bhagat', 'Biography', 'Brief', 'Business', 'Camus', 'Cervantes', 'Christie', 'Classics', 'Comics', 'Cook', 'Cricket', 'Cycling', 'Desai', 'Design', 'Development', 'Digital Marketing', 'Drama', 'Drawing', 'Dumas', 'Education', 'Everything', 'Fantasy', 'Film', 'Finance', 'First', 'Fitness', 'Football', 'Future', 'Games', 'Gandhi', 'Homer', 'Horror', 'Hugo', 'Ibsen', 'Journey', 'Kafka', 'King', 'Lahiri', 'Larsson', 'Learn', 'Literary Fiction', 'Make', 'Manage', 'Marquez', 'Money', 'Mystery', 'Negotiate', 'Painting', 'Philosophy', 'Photography', 'Poetry', 'Production', 'Programming', 'React', 'Redux', 'River', 'Robotics', 'Rowling', 'Satire', 'Science Fiction', 'Shakespeare', 'Singh', 'Swimming', 'Tale', 'Thrun', 'Time', 'Tolstoy', 'Travel', 'Ultimate', 'Virtual Reality', 'Web Development', 'iOS'
-    ]
 
-    addToShelf(id, category){
-      booksApi.update({id}, category)
-      .then(updates =>{
-        console.log(updates)
-        booksApi.get(id)
-        .then(book=>{
-          console.log(book)
-        })
-        .catch(err => console.error(err))
-      })
-      .catch(err => console.error(err))
+
+    addToShelf(id, old_shelf, new_shelf){
+      this.props.changeShelf(id, old_shelf, new_shelf)
     }
 
     onSearch(query){
-      if(this.terms.includes(query)){
         booksApi.search(query)
         .then(books => {
             if(books && books.length && books.length > 0){
+              const readings = this.props.readings
+              // If a book is in the users readings, get the shelf and add it to the book in the search page
+              for (let i = 0; i < books.length; i++) {
+                  for(let x=0; x < readings.length; x++){
+                    if(books[i].id === readings[x].id){
+                      books[i].shelf = readings[x].shelf
+                    }
+                  }                
+              }
                 this.setState({result: books})
-                console.log(this.state.result)
             }else{
               this.setState({result: []})
             }
@@ -41,7 +42,7 @@ class Search extends Component {
           this.setState({result: []})
           console.error(err)
         })
-      }
+      
   
     }
 
@@ -60,6 +61,7 @@ class Search extends Component {
                  <li key={book.id}> 
                   <Book 
                         id={book.id}
+                        shelf={book.shelf? book.shelf : 'none'}
                         changeShelf={this.addToShelf}
                         cover={book.imageLinks.thumbnail? book.imageLinks.thumbnail : 'https://i0.wp.com/code-artisan.io/wp-content/uploads/2020/12/default_book_cover_2015.jpg?resize=200%2C300&ssl=1'} 
                         title={book.title} 
